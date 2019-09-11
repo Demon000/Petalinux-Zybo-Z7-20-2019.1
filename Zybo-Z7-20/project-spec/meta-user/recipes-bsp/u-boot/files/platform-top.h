@@ -24,13 +24,16 @@
 #endif
 #endif
 
-/*Dependencies for ENV to be stored in EEPROM. Ensure environment fits in eeprom size*/
-#ifdef CONFIG_ENV_IS_IN_EEPROM
-#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN         1
-#define CONFIG_SYS_I2C_EEPROM_ADDR             0x54
-#define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS      4
-#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS  5
-#define CONFIG_SYS_EEPROM_SIZE                 1024 /* Bytes */
-#define CONFIG_SYS_I2C_MUX_ADDR                0x74
-#define CONFIG_SYS_I2C_MUX_EEPROM_SEL          0x4
+/* Read GEM MAC Address from OTP address 0x20 in SPI Flash */
+#ifndef CONFIG_ZYNQ_QSPI
+#define CONFIG_ZYNQ_QSPI
+#endif
+#define ZYNQ_GEM_SPI_MAC_OFFSET	0x20
+
+/* Add ability to read uEnv.txt when not using SPI Flash for env */
+#ifndef CONFIG_ENV_IS_IN_SPI_FLASH
+#define CONFIG_ENV_IS_NOWHERE
+#define CONFIG_ENV_SIZE	0x20000
+#undef CONFIG_PREBOOT
+#define CONFIG_PREBOOT	"echo U-BOOT for Zybo Z7; setenv preboot; setenv bootenv uEnv.txt;  setenv loadbootenv_addr 0x3EE00000; if test $modeboot = sdboot && env run sd_uEnvtxt_existence_test; then if env run loadbootenv; then env run importbootenv; fi; fi; dhcp"
 #endif
