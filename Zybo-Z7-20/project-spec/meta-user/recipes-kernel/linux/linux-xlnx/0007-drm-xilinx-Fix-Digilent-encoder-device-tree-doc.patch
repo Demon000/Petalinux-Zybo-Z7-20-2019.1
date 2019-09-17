@@ -1,0 +1,87 @@
+From c8031d405ae1808f0837789d9bc0004243847023 Mon Sep 17 00:00:00 2001
+From: Sam Bobrowicz <sbobrowicz@digilentinc.com>
+Date: Mon, 17 Jul 2017 20:23:47 -0700
+Subject: [PATCH 7/9] drm: xilinx: Fix Digilent encoder device tree doc
+
+Update the needed doc changes for previous commits.
+---
+ .../bindings/drm/xilinx/dglnt_encoder.txt     | 22 -----------
+ .../bindings/drm/xilinx/digilent_encoder.txt  | 37 +++++++++++++++++++
+ 2 files changed, 37 insertions(+), 22 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/drm/xilinx/dglnt_encoder.txt
+ create mode 100644 Documentation/devicetree/bindings/drm/xilinx/digilent_encoder.txt
+
+diff --git a/Documentation/devicetree/bindings/drm/xilinx/dglnt_encoder.txt b/Documentation/devicetree/bindings/drm/xilinx/dglnt_encoder.txt
+deleted file mode 100644
+index f0950a0a2874..000000000000
+--- a/Documentation/devicetree/bindings/drm/xilinx/dglnt_encoder.txt
++++ /dev/null
+@@ -1,22 +0,0 @@
+-Device-Tree bindings for Digilent DRM Encoder Slave
+-
+-This driver provides support for VGA and HDMI outputs on Digilent FPGA boards. The
+-VGA or HDMI port must be connected to a Xilinx display pipeline via an axi2vid
+-IP core.
+-
+-Required properties:
+- - compatible: Should be "dglnt,drm-encoder".
+-
+-Optional properties:
+- - dglnt,edid-i2c: The I2C device connected to the DDC bus on the video connector.
+-                   This is used to obtain the supported resolutions of an attached 
+-                   monitor. If not defined, then a default set of resolutions is used
+-                   and the display will initialize to 720p. Note most VGA connectors
+-                   on Digilent boards do not have the DDC bus routed out. 
+-
+-Example:
+-
+-      encoder_0: digilent_encoder {
+-		   compatible = "dglnt,drm-encoder";
+-         dglnt,edid-i2c = <&i2c1>;
+-      };
+diff --git a/Documentation/devicetree/bindings/drm/xilinx/digilent_encoder.txt b/Documentation/devicetree/bindings/drm/xilinx/digilent_encoder.txt
+new file mode 100644
+index 000000000000..df88b407baec
+--- /dev/null
++++ b/Documentation/devicetree/bindings/drm/xilinx/digilent_encoder.txt
+@@ -0,0 +1,37 @@
++Device-Tree bindings for Digilent DRM Encoder Slave
++
++This driver provides support for VGA and HDMI outputs on Digilent FPGA boards. The
++VGA or HDMI port must be connected to a Xilinx display pipeline via an axi2vid
++IP core.
++
++Required properties:
++ - compatible: Should be "digilent,drm-encoder".
++
++Optional properties:
++ - digilent,edid-i2c: The I2C device connected to the DDC bus on the video connector.
++                      This is used to obtain the supported resolutions of an attached 
++                      monitor. If not defined, then a default set of resolutions is used
++                      and the display will initialize to the closest available size 
++                      specified by vpref and hpref. Note most VGA connectors on Digilent 
++                      boards do not have the DDC bus routed out. 
++- digilent,fmax: The maximum pixel clock frequency allowed, in KHz (as integer). Should 
++                 be set considering maximum serdes rate and also the rate the axi stream
++                 mm2s bus on the vdma is clocked. If pixel clock is greater than the mm2s
++                 stream clock then the output pipeline will underflow. Default is 150000.
++- digilent,hmax: The maximum horizontal width allowed for resolutions (as integer). 
++                 Default is 1920. 
++- digilent,vmax: The maximum vertical height allowed for resolutions (as integer). 
++                 Default is 1080.
++- digilent,hpref: The preferred resolution width (as integer). Only used if edid-i2c not
++                  present or invalid. Can be used to control resolution at boot when no 
++                  EDID bus is available. Default is 1280.
++- digilent,vpref: The preferred resolution height (as integer). Only used if edid-i2c not
++                  present or invalid. Can be used to control resolution at boot when no 
++                  EDID bus is available. Default is 720.
++
++Example:
++
++      encoder_0: digilent_encoder {
++		   compatible = "digilent,drm-encoder";
++         digilent,edid-i2c = <&i2c1>;
++      };
+-- 
+2.17.1
+

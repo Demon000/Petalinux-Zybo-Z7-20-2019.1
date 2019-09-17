@@ -1,0 +1,39 @@
+From 8aca27f8a7f46dbd5ced539f46349063153bede3 Mon Sep 17 00:00:00 2001
+From: Sam Bobrowicz <sbobrowicz@digilentinc.com>
+Date: Sat, 20 Feb 2016 17:02:31 -0800
+Subject: [PATCH 4/9] clk: dglnt-dynclk: check locked in enable
+
+Ensure that the clock is running before returning from the enable function.
+
+Signed-off-by: Sam Bobrowicz <sbobrowicz@digilentinc.com>
+---
+ drivers/clk/clk-dglnt-dynclk.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/clk/clk-dglnt-dynclk.c b/drivers/clk/clk-dglnt-dynclk.c
+index 924140192b87..ece96d5162e6 100644
+--- a/drivers/clk/clk-dglnt-dynclk.c
++++ b/drivers/clk/clk-dglnt-dynclk.c
+@@ -382,9 +382,16 @@ static struct dglnt_dynclk *clk_hw_to_dglnt_dynclk(struct clk_hw *clk_hw)
+ static int dglnt_dynclk_enable(struct clk_hw *clk_hw)
+ {
+ 	struct dglnt_dynclk *dglnt_dynclk = clk_hw_to_dglnt_dynclk(clk_hw);
+-   
+-   if (dglnt_dynclk->freq)
+-      writel(1, dglnt_dynclk->base + OFST_DISPLAY_CTRL);
++	unsigned int clock_state;
++
++	if (dglnt_dynclk->freq)
++	{
++		writel(1, dglnt_dynclk->base + OFST_DISPLAY_CTRL);
++		do
++		{
++			clock_state = readl(dglnt_dynclk->base + OFST_DISPLAY_STATUS);
++		} while (!clock_state);
++	}
+ 	return 0;
+ }
+ 
+-- 
+2.17.1
+
