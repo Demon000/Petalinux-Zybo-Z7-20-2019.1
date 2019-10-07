@@ -8,6 +8,7 @@ SRC_URI_append = " \
         file://0007-drm-xilinx-Fix-Digilent-encoder-device-tree-doc.patch \
         file://0008-xilinx-digilent_encoder-fix-compilation-with-4.19.patch \
         file://0009-v4l-xilinx-xcsi2rxss-Use-external-reset-in-a-SLBF-co.patch \
+        file://0001-Revert-media-ov5640-Fix-timings-setup-code.patch \
         "
 
 SRC_URI += "file://user_2019-09-11-16-54-00.cfg \

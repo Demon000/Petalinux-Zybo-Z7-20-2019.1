@@ -1,0 +1,95 @@
+From b59484978e5e86a1e61af52aa4fef8e5a1b178fb Mon Sep 17 00:00:00 2001
+From: Demon000 <demonsingur@gmail.com>
+Date: Fri, 4 Oct 2019 12:07:49 +0300
+Subject: [PATCH] Revert "media: ov5640: Fix timings setup code"
+
+This reverts commit 2080cccbb622912d15ad727e98349cc971192952.
+---
+ drivers/media/i2c/ov5640.c | 50 ++++++++++++++++++++++----------------
+ 1 file changed, 29 insertions(+), 21 deletions(-)
+
+diff --git a/drivers/media/i2c/ov5640.c b/drivers/media/i2c/ov5640.c
+index ecd8b3a6f0f1..bf280962ccdf 100644
+--- a/drivers/media/i2c/ov5640.c
++++ b/drivers/media/i2c/ov5640.c
+@@ -1160,26 +1160,6 @@ static int ov5640_set_sclk(struct ov5640_dev *sensor,
+ }
+ 
+ /* download ov5640 settings to sensor through i2c */
+-static int ov5640_set_timings(struct ov5640_dev *sensor,
+-			      const struct ov5640_mode_info *mode)
+-{
+-	int ret;
+-
+-	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_DVPHO, mode->hact);
+-	if (ret < 0)
+-		return ret;
+-
+-	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_DVPVO, mode->vact);
+-	if (ret < 0)
+-		return ret;
+-
+-	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_HTS, mode->htot);
+-	if (ret < 0)
+-		return ret;
+-
+-	return ov5640_write_reg16(sensor, OV5640_REG_TIMING_VTS, mode->vtot);
+-}
+-
+ static int ov5640_load_regs(struct ov5640_dev *sensor,
+ 			    const struct ov5640_mode_info *mode)
+ {
+@@ -1207,7 +1187,7 @@ static int ov5640_load_regs(struct ov5640_dev *sensor,
+ 			usleep_range(1000 * delay_ms, 1000 * delay_ms + 100);
+ 	}
+ 
+-	return ov5640_set_timings(sensor, mode);
++	return ret;
+ }
+ 
+ static int ov5640_set_autoexposure(struct ov5640_dev *sensor, bool on)
+@@ -1689,6 +1669,30 @@ static int ov5640_set_virtual_channel(struct ov5640_dev *sensor)
+ 	return ov5640_write_reg(sensor, OV5640_REG_DEBUG_MODE, temp);
+ }
+ 
++static int ov5640_set_timings(struct ov5640_dev *sensor,
++			      const struct ov5640_mode_info *mode)
++{
++	int ret;
++
++	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_DVPHO, mode->hact);
++	if (ret < 0)
++		return ret;
++
++	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_DVPVO, mode->vact);
++	if (ret < 0)
++		return ret;
++
++	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_HTS, mode->htot);
++	if (ret < 0)
++		return ret;
++
++	ret = ov5640_write_reg16(sensor, OV5640_REG_TIMING_VTS, mode->vtot);
++	if (ret < 0)
++		return ret;
++
++	return 0;
++}
++
+ static const struct ov5640_mode_info *
+ ov5640_find_mode(struct ov5640_dev *sensor, enum ov5640_frame_rate fr,
+ 		 int width, int height, bool nearest)
+@@ -1997,6 +2001,10 @@ static int ov5640_set_mode(struct ov5640_dev *sensor)
+ 	if (auto_exp)
+ 		ov5640_set_autoexposure(sensor, true);
+ 
++	ret = ov5640_set_timings(sensor, mode);
++	if (ret < 0)
++		return ret;
++
+ 	ret = ov5640_set_binning(sensor, dn_mode != SCALING);
+ 	if (ret < 0)
+ 		return ret;
+-- 
+2.17.1
+
